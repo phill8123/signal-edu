@@ -64,8 +64,8 @@ const App: React.FC = () => {
       setResult(data);
       setLoading(false);
       
-      // Update credits (up to 11 maximum)
-      setCredits(prev => Math.min(prev + 1, 11));
+      // Update credits (up to 12 maximum)
+      setCredits(prev => Math.min(prev + 1, 12));
       
       const newItem: SearchHistoryItem = { word: data.word, level: targetLevel, timestamp: Date.now() };
       const newHistory = [newItem, ...history.filter(h => h.word !== data.word)].slice(0, 50);
@@ -111,7 +111,7 @@ const App: React.FC = () => {
           <div className="flex items-center gap-2">
             <div className="flex items-center gap-1.5 bg-slate-800/80 border border-slate-700/50 px-3 py-1.5 rounded-full text-xs font-bold text-amber-400 shadow-sm shrink-0">
               <Zap size={14} className="fill-current text-amber-500 animate-pulse" />
-              <span>{credits} / 11 Credits</span>
+              <span>{credits} / 12 Credits</span>
             </div>
             
             <button 

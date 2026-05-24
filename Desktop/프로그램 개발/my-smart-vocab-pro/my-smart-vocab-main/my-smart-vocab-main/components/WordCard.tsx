@@ -26,14 +26,36 @@ export const WordCard: React.FC<WordCardProps> = ({ data, level, themeColor, onR
     };
   }, []);
 
-  // Regex to filter out bracketed English translation text in Korean mode
+  // Smart filtering of example sentences based on selected language
   const filterSentenceText = (text: string) => {
     if (!text) return '';
-    if (language === 'korean') {
-      // Matches parenthesized English sentences (e.g., "(People in the Joseon Dynasty carried out...)")
-      // and replaces them with an empty string, keeping only the Korean text.
-      return text.replace(/\s*\([^)]*[a-zA-Z]{3,}[^)]*\)/g, '').trim();
+    
+    // Check if there are parentheses containing English or Korean
+    const parenRegex = /\(([^)]+)\)/g;
+    const matches = [...text.matchAll(parenRegex)];
+    
+    if (matches.length > 0) {
+      const parenthesizedContent = matches[0][1]; // Content inside first set of parentheses
+      const mainContent = text.replace(/\([^)]+\)/g, '').trim(); // Content outside parentheses
+      
+      const hasKoreanInParen = /[ㄱ-ㅎ|ㅏ-ㅣ|가-힣]/.test(parenthesizedContent);
+      const hasKoreanInMain = /[ㄱ-ㅎ|ㅏ-ㅣ|가-힣]/.test(mainContent);
+      
+      if (language === 'korean') {
+        if (hasKoreanInMain) {
+          return mainContent;
+        } else if (hasKoreanInParen) {
+          return parenthesizedContent;
+        }
+      } else { // language === 'english'
+        if (!hasKoreanInMain) {
+          return mainContent;
+        } else if (!hasKoreanInParen) {
+          return parenthesizedContent;
+        }
+      }
     }
+    
     return text;
   };
 
@@ -167,7 +189,9 @@ export const WordCard: React.FC<WordCardProps> = ({ data, level, themeColor, onR
                     <span className={`flex items-center justify-center w-8 h-8 rounded-full font-bold text-white shadow-sm ${idx === 0 ? `bg-${themeColor}-500` : 'bg-slate-400'}`}>{idx + 1}</span>
                     {meaning.emoji && <span className="text-2xl filter drop-shadow-sm ml-1" role="img" aria-label={meaning.context}>{meaning.emoji}</span>}
                     <h3 className={`text-xl font-bold text-slate-800 ml-1`}>{meaning.context}</h3>
-                    {meaning.hanja && <span className="text-xl text-slate-700 font-black font-serif ml-1 tracking-wide">({meaning.hanja})</span>}
+                    {meaning.hanja && meaning.hanja.toLowerCase() !== 'none' && !meaning.hanja.includes('고유어') && (
+                      <span className="text-xl text-slate-700 font-black font-serif ml-1 tracking-wide">({meaning.hanja})</span>
+                    )}
                 </div>
             </div>
             
